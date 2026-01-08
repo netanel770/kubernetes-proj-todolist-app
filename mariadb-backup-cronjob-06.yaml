@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mariadb-nightly-backup
+spec:
+  schedule: "0 2 * * *"  
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: alpine:3.19
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  DATE=$(date +"%Y%m%d-%H%M")
+                  mkdir -p /backups/$DATE
+                  cp -a /var/lib/mysql/* /backups/$DATE/
+                  echo "Backup completed to /backups/$DATE"
+              volumeMounts:
+                - name: mariadb-data
+                  mountPath: /var/lib/mysql
+                  readOnly: true
+                - name: backups
+                  mountPath: /backups
+          volumes:
+            - name: mariadb-data
+              persistentVolumeClaim:
+                claimName: mariadb-data-mariadb-0
+            - name: backups
+              persistentVolumeClaim:
+                claimName: todolist-backups

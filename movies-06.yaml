@@ -1,0 +1,35 @@
+apiVersion: cndw.mta.io/v1alpha1
+kind: Movie
+metadata:
+  name: inception
+spec:
+  title: "Inception"
+  year: 2010
+  director: "Christopher Nolan"
+  genres: ["Sci-Fi", "Thriller"]
+  rating: 8.8
+  watched: true
+---
+apiVersion: cndw.mta.io/v1alpha1
+kind: Movie
+metadata:
+  name: the-matrix
+spec:
+  title: "The Matrix"
+  year: 1999
+  director: "The Wachowskis"
+  genres: ["Sci-Fi", "Action"]
+  rating: 8.7
+  watched: true
+---
+apiVersion: cndw.mta.io/v1alpha1
+kind: Movie
+metadata:
+  name: parasite
+spec:
+  title: "Parasite"
+  year: 2019
+  director: "Bong Joon-ho"
+  genres: ["Drama", "Thriller"]
+  rating: 8.5
+  watched: false
