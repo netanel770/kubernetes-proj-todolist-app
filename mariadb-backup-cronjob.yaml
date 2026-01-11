@@ -1,0 +1,46 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "todolist.fullname" . }}-mariadb-nightly-backup
+  labels:
+    {{- include "todolist.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "todolist.labels" . | nindent 12 }}
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: {{ .Values.backup.image | default "alpine:3.19" }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  DATE=$(date +"%Y%m%d-%H%M")
+                  mkdir -p /backups/$DATE
+                  cp -a /var/lib/mysql/* /backups/$DATE/
+                  echo "Backup completed to /backups/$DATE"
+              volumeMounts:
+                - name: mariadb-data
+                  mountPath: /var/lib/mysql
+                  readOnly: true
+                - name: backups
+                  mountPath: /backups
+          volumes:
+            - name: mariadb-data
+              persistentVolumeClaim:
+                claimName: mariadb-data-{{ include "todolist.fullname" . }}-mariadb-0
+            - name: backups
+              persistentVolumeClaim:
+                claimName: {{ include "todolist.fullname" . }}-backups
+{{- end }}

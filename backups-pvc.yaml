@@ -1,0 +1,17 @@
+{{- if .Values.backup.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "todolist.fullname" . }}-backups
+  labels:
+    {{- include "todolist.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.backup.pvc.storageClassName }}
+  storageClassName: {{ .Values.backup.pvc.storageClassName }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.backup.pvc.size | default "5Gi" }}
+{{- end }}
