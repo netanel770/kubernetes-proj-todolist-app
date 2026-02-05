@@ -1,0 +1,35 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "todolist.fullname" . }}-ingress
+  labels:
+    {{- include "todolist.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  rules:
+    {{- if .Values.ingress.host }}
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+    {{- else }}
+    - http:
+    {{- end }}
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "todolist.fullname" . }}-{{ .Values.names.frontend }}
+                port:
+                  number: {{ .Values.todolist.port }}
+
+          - path: /todos
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "todolist.fullname" . }}-{{ .Values.names.api }}
+                port:
+                  number: {{ .Values.api.port }}
+{{- end }}

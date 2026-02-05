@@ -49,21 +49,6 @@ spec:
           volumeMounts:
             - name: mariadb-data
               mountPath: /var/lib/mysql
-          readinessProbe:
-            tcpSocket:
-              port: {{ .Values.mariadb.port }}
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            timeoutSeconds: 1
-            failureThreshold: 3
-          livenessProbe:
-            tcpSocket:
-              port: {{ .Values.mariadb.port }}
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 1
-            failureThreshold: 3
-
   volumeClaimTemplates:
     - metadata:
         name: mariadb-data

@@ -10,6 +10,6 @@ spec:
     app.kubernetes.io/component: frontend
   ports:
     - name: http
-      port: 5000
-      targetPort: 5000
-  type: ClusterIP
+      port: {{ .Values.todolist.port }}
+      targetPort: {{ .Values.todolist.port }}
+  type: {{ .Values.service.frontendType }}

@@ -6,6 +6,6 @@ metadata:
     {{- include "todolist.labels" . | nindent 4 }}
 data:
   MYSQL_DB: todo
-  MYSQL_HOST: {{ printf "%s-%s" (include "todolist.fullname" .) .Values.names.backend }}
+  MYSQL_HOST: {{ printf "%s-%s" (include "todolist.fullname" .) .Values.env.mysqlHost | quote }}
   MYSQL_USER: {{ .Values.mysql.user | quote }}
   USER: {{ .Values.todolist.appUser | quote }}
