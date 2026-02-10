@@ -1,7 +1,7 @@
 todolist:
-  image: ghcr.io/bennyro-mta/todolist:1.10
-  port: 5000
-  appUser: "netanel"
+  image: ghcr.io/bennyro-mta/todolist-vue:1.2
+  port: 8080
+  appUser: "Netanel Mirel"
 
 mariadb:
   image: mariadb
@@ -40,9 +40,9 @@ backup:
     image: busybox:1.36
 
 replicaCount:
-  webui: 1
+  webui: 2
   api: 1
-  todolist: 1 
+  todolist: 2
 
 service:
   webuiType: LoadBalancer
@@ -52,7 +52,7 @@ service:
 env:
   user: "Netanel Mirel"      
   mysqlHost: backend       
-  apiBaseUrl: ""              
+  apiBaseUrl: "/todos"              
  
 autoscaling:
   enabled: true

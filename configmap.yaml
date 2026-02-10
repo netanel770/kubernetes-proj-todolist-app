@@ -9,3 +9,4 @@ data:
   MYSQL_HOST: {{ printf "%s-%s" (include "todolist.fullname" .) .Values.env.mysqlHost | quote }}
   MYSQL_USER: {{ .Values.mysql.user | quote }}
   USER: {{ .Values.todolist.appUser | quote }}
+  API_BASE_URL: {{ printf "http://%s-%s:%d" (include "todolist.fullname" .) .Values.names.api (int .Values.api.port) | quote }}

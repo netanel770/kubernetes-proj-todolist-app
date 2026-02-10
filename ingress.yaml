@@ -17,6 +17,24 @@ spec:
     - http:
     {{- end }}
         paths:
+          # חשוב: ה-API חייב להופיע ראשון ברשימה
+          - path: /todos
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "todolist.fullname" . }}-{{ .Values.names.api }}
+                port:
+                  number: {{ .Values.api.port }}
+          
+          - path: /livez
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "todolist.fullname" . }}-{{ .Values.names.api }}
+                port:
+                  number: {{ .Values.api.port }}
+
+          # הפרונטנד תופס את כל השאר
           - path: /
             pathType: Prefix
             backend:
@@ -25,7 +43,7 @@ spec:
                 port:
                   number: {{ .Values.todolist.port }}
 
-          - path: /todos
+          - path: /readyz
             pathType: Prefix
             backend:
               service:
