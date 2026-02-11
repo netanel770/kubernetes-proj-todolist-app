@@ -40,14 +40,14 @@ backup:
     image: busybox:1.36
 
 replicaCount:
-  webui: 2
+  webui: 1
   api: 1
-  todolist: 2
+  todolist: 1
 
 service:
   webuiType: LoadBalancer
   frontendType: LoadBalancer  
-  apiType: ClusterIP           
+  apiType: LoadBalancer           
 
 env:
   user: "Netanel Mirel"      

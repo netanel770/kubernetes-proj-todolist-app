@@ -1,0 +1,87 @@
+===============================================
+1) START MINIKUBE TUNNEL (MANDATORY)
+===============================================
+
+In a separate terminal (keep it open):
+
+Windows (Run as Administrator):
+  minikube tunnel
+
+Linux/macOS:
+  sudo minikube tunnel
+
+===============================================
+2) ENABLE METRICS SERVER (FOR HPA)
+===============================================
+
+If not already enabled, run:
+
+Windows / Linux / macOS:
+  minikube addons enable metrics-server
+
+Verify metrics are working:
+  kubectl top pods
+
+===============================================
+3) GET INGRESS EXTERNAL IP
+===============================================
+
+Windows:
+  $LB = (kubectl get svc -n ingress-nginx ingress-nginx-controller `
+        -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo $LB
+
+Linux/macOS:
+  LB=$(kubectl get svc -n ingress-nginx ingress-nginx-controller \
+       -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo $LB
+
+===============================================
+4) ACCESS YOUR APPLICATION
+===============================================
+
+Your application is available at:
+
+  http://<Release.Name>.<EXTERNAL-IP>.nip.io/
+
+Example (if LB=127.0.0.1):
+  http://todo1.127.0.0.1.nip.io/
+
+===============================================
+5) VERIFY API IS WORKING
+===============================================
+
+Windows:
+  iwr "http://{{ .Release.Name }}.<EXTERNAL-IP>.nip.io/todos" -UseBasicParsing
+
+Linux/macOS:
+  curl http://{{ .Release.Name }}.<EXTERNAL-IP>.nip.io/todos
+
+===============================================
+6) MANUAL BACKUP
+===============================================
+
+Run a backup job now:
+
+  kubectl create job \
+    --from=cronjob/{{ .Release.Name }}-todolist-backup \
+    {{ .Release.Name }}-backup-manual
+
+Check logs:
+  kubectl logs job/{{ .Release.Name }}-backup-manual
+
+===============================================
+7) HPA VERIFICATION
+===============================================
+
+Check autoscaler:
+  kubectl get hpa
+
+Generate load (optional test):
+  kubectl run loadgen --image=busybox -it --restart=Never -- \
+    sh -c "while true; do wget -qO- \
+    http://{{ .Release.Name }}-todolist-todo-api:8080/todos; done"
+
+===============================================
+Enjoy your TodoList on Kubernetes
+===============================================
