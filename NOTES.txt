@@ -1,8 +1,21 @@
 Thank you for installing the TodoList Helm Chart!
+
 ===============================================
-1) START MINIKUBE TUNNEL (MANDATORY)
+1) ENABLE METRICS SERVER (FOR HPA)
 ===============================================
-In a separate terminal (keep it open):
+
+Windows / Linux / macOS:
+  minikube addons enable metrics-server
+
+Verify metrics (should not error):
+  kubectl top pods
+
+===============================================
+2) START MINIKUBE TUNNEL (MANDATORY)
+===============================================
+
+Run in a separate terminal and KEEP IT OPEN:
+
 Windows (Run as Administrator):
   minikube tunnel
 
@@ -10,63 +23,51 @@ Linux/macOS:
   sudo minikube tunnel
 
 ===============================================
-2) ENABLE METRICS SERVER (FOR HPA)
-===============================================
-If not already enabled, run:
-Windows / Linux / macOS:
-  minikube addons enable metrics-server
-
-Verify metrics are working:
-  kubectl top pods
-
-===============================================
-3) GET INGRESS EXTERNAL IP
+3) EXPOSE INGRESS CONTROLLER AS LOADBALANCER
 ===============================================
 
 Windows (PowerShell):
-  $LB = (kubectl get svc -n ingress-nginx ingress-nginx-controller `
-        -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-  echo $LB
+  kubectl patch svc ingress-nginx-controller -n ingress-nginx -p "{\"spec\":{\"type\":\"LoadBalancer\"}}"
 
 Linux/macOS:
-  LB=$(kubectl get svc -n ingress-nginx ingress-nginx-controller \
-       -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-  echo $LB
-===============================================
-4) INSTALL A RELEASE (OCI / GHCR)
-===============================================
+  kubectl patch svc ingress-nginx-controller -n ingress-nginx -p '{"spec":{"type":"LoadBalancer"}}'
 
-Set your release name:
-  Example release: todo1
+===============================================
+4) GET INGRESS EXTERNAL IP
+===============================================
 
 Windows (PowerShell):
-  $REL="todo1"
-  $HOST1="$REL.$LB.nip.io"
-  helm install $REL oci://ghcr.io/netanel770/kubernetes-proj-todolist-app/todolist `
-    --set MY_SQL_ROOT_PASSWORD="password123" `
-    --set ingress.host="$HOST1"
+  $LB = (kubectl get svc -n ingress-nginx ingress-nginx-controller -o json | ConvertFrom-Json).status.loadBalancer.ingress[0].ip
 
 Linux/macOS:
-  REL="todo1"
-  HOST1="$REL.$LB.nip.io"
-  helm install "$REL" oci://ghcr.io/netanel770/kubernetes-proj-todolist-app/todolist \
-    --set MY_SQL_ROOT_PASSWORD="password123" \
-    --set ingress.host="$HOST1"
+  LB=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
+Expected in Minikube: 127.0.0.1
 
 ===============================================
-5) ACCESS YOUR APPLICATION
+5) INSTALL A RELEASE (OCI / GHCR)
+===============================================
+
+NOTE: Use a unique release name for multi-install (todo1, todo2, ...)
+
+Windows (PowerShell):
+  $REL="todo1"; $HOST1="$REL.$LB.nip.io"; helm install $REL oci://ghcr.io/netanel770/kubernetes-proj-todolist-app/todolist --set MY_SQL_ROOT_PASSWORD="password123" --set ingress.host="$HOST1"
+
+Linux/macOS:
+  REL="todo1"; HOST1="$REL.$LB.nip.io"; helm install "$REL" oci://ghcr.io/netanel770/kubernetes-proj-todolist-app/todolist --set MY_SQL_ROOT_PASSWORD="password123" --set ingress.host="$HOST1"
+
+===============================================
+6) ACCESS YOUR APPLICATION
 ===============================================
 
 Open in browser:
   http://<release>.<EXTERNAL-IP>.nip.io/
 
-Example (if LB=127.0.0.1):
+Example (LB=127.0.0.1):
   http://todo1.127.0.0.1.nip.io/
 
-
 ===============================================
-6) VERIFY API IS WORKING
+7) VERIFY API IS WORKING
 ===============================================
 
 Windows:
@@ -75,31 +76,5 @@ Windows:
 Linux/macOS:
   curl http://todo1.<EXTERNAL-IP>.nip.io/todos
 
-
-===============================================
-7) MANUAL BACKUP
 ===============================================
 
-Run a backup job now:
-
-  kubectl create job --from=cronjob/{{ .Release.Name }}-todolist-backup {{ .Release.Name }}-backup-manual
-
-Check logs:
-  kubectl logs job/{{ .Release.Name }}-backup-manual
-
-
-===============================================
-8) HPA VERIFICATION
-===============================================
-
-Check autoscaler:
-  kubectl get hpa
-
-Generate load (optional test):
-  kubectl run loadgen --image=busybox -it --restart=Never -- \
-    sh -c "while true; do wget -qO- http://{{ .Release.Name }}-todolist-todo-api:8080/todos; done"
-
-
-===============================================
-Enjoy your TodoList on Kubernetes!
-===============================================
