@@ -27,8 +27,8 @@ Linux/macOS:
 ===============================================
 
 Windows (PowerShell):
-  kubectl patch svc ingress-nginx-controller -n ingress-nginx -p "{\"spec\":{\"type\":\"LoadBalancer\"}}"
-
+  kubectl patch svc ingress-nginx-controller -n ingress-nginx -p "{\`"spec\`": {\`"type\`": \`"LoadBalancer\`"}}"
+  
 Linux/macOS:
   kubectl patch svc ingress-nginx-controller -n ingress-nginx -p '{"spec":{"type":"LoadBalancer"}}'
 
